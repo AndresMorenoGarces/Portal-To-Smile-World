@@ -17,7 +17,9 @@ public class GameManager : MonoBehaviour
     private MovingType movingType = 0;
     private PlatformType platformType = 0;
     private TurnState turnState = 0;
-    private QuestionState questionState;
+    private QuestionState questionState = 0;
+    private PlayerState playerState = 0;
+    private TargetState targetState = 0;
 
     private float timerToLooseQuestion = 10, skyboxRotationSpeed;
     private string[] generalCultureQuestions;
@@ -40,7 +42,7 @@ public class GameManager : MonoBehaviour
             turnState = TurnState.Started;
             AlternateInterface(0);
             activeCamera = ActiveCamera.FirstPerson;
-            camMReference.TypesOfCameras(activeCamera);
+            camMReference.TypesOfCameras(activeCamera, specificVoidTransform);
             UpdateCurrentData();
             AnimationScript.instance.TapAnimation(true);
             uIGameReference.ShowPlayerTexts(turnOfPlayer);
@@ -65,19 +67,19 @@ public class GameManager : MonoBehaviour
             AudioScript.instance.DiceAudioState(0);
             diceNumber = Random.Range(1, 7);
             movingType = MovingType.Advancing;
+            targetState = TargetState.NotUpdate;
             StartCoroutine(TimeToDiceAnimation());
         }
         IEnumerator TimeToDiceAnimation()
         {
-            yield return new WaitForSeconds(1);
+            yield return new WaitForSeconds(2);
             AudioScript.instance.DiceAudioState(1);
             uIGameReference.ShowDiceMoves(2, diceNumber);
-            yield return new WaitForSeconds(2);
+            yield return new WaitForSeconds(3);
             AudioScript.instance.DiceAudioState(2);
             AnimationScript.instance.DiceAnimations(false);
             emptyDiceTransform.eulerAngles = diceFaceRotation[diceNumber - 1];
             yield return new WaitForSeconds(2);
-            AudioScript.instance.DiceAudioState(3);
             gameCycle = GameCycle.ThirdStep;
         }
     }
@@ -87,9 +89,19 @@ public class GameManager : MonoBehaviour
         {
             AlternateInterface(2);
             activeCamera = ActiveCamera.ThirdPerson;
-            camMReference.TypesOfCameras(activeCamera);
-            charCReference.PlayerMove(specificVoidTransform, wayPoints, UpdatingTemporalTarget(), UpdatingCurrentTarget());
+            playerState = PlayerState.Moving;
+            camMReference.TypesOfCameras(activeCamera, specificVoidTransform);
+            charCReference.PlayerMove(specificVoidTransform, wayPoints, UpdatingTemporalTarget(), UpdatingCurrentTarget(), turnOfPlayer);
             uIGameReference.ShowMovingText(movingType, diceNumber, UpdatingCurrentTarget());
+            if (temporalTarget == currentTarget && targetState == TargetState.Update)
+            {
+                StartCoroutine(TimeWaitingToTVEvent());
+                IEnumerator TimeWaitingToTVEvent()
+                {
+                    yield return new WaitForSeconds(2f);
+                    gameCycle = GameCycle.FourthStep;
+                }
+            }
         }
         int UpdatingTemporalTarget() 
         {
@@ -120,17 +132,9 @@ public class GameManager : MonoBehaviour
                     currentTarget = 0;
                 else
                     currentTarget = wayPoints.Length - 1;
+                targetState = TargetState.Update;
             }
             return currentTarget;
-        }
-        if (temporalTarget == currentTarget)
-        {
-            StartCoroutine(TimeWaitingToTVEvent());
-            IEnumerator TimeWaitingToTVEvent()
-            {
-                yield return new WaitForSeconds(2f);
-                gameCycle = GameCycle.FourthStep;
-            }
         }
     }
     private void ShowTVQuestions()
@@ -274,8 +278,8 @@ public class GameManager : MonoBehaviour
         ShowCurrentPlayer();
         ShowDice();
         WaypointDisplacing();
-        ShowTVQuestions();
-        SavePlayerValues();
+        //ShowTVQuestions();
+        //SavePlayerValues();
     }
 
     private void Awake()

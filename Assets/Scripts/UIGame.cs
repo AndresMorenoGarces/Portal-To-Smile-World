@@ -1,17 +1,18 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class UIGame : MonoBehaviour
 {
-    public Text aAnswer;
-    public Text bAnswer;
-    public Text cAnswer;
-    public Text playerTurnText;
-    public Text moveSpacesText;
-    public Text leftPlaces;
-    public Text currentPlace;
-    public Text eventTvText;
-    public Text moveDiceText;
+    public TextMeshProUGUI aAnswer;
+    public TextMeshProUGUI bAnswer;
+    public TextMeshProUGUI cAnswer;
+    public TextMeshProUGUI playerTurnText;
+    public TextMeshProUGUI moveSpacesText;
+    public TextMeshProUGUI leftPlaces;
+    public TextMeshProUGUI currentPlace;
+    public TextMeshProUGUI eventTvText;
+    public TextMeshProUGUI moveDiceText;
     public Text counterQuestionText;
 
     private string currentMovingText;
@@ -29,18 +30,17 @@ public class UIGame : MonoBehaviour
     public void ShowDiceMoves(int showDicePart, int diceNumber)
     {
         if (showDicePart == 1)
-            moveDiceText.text = "How Much... \nCan You Advance?";
+            moveDiceText.text = "How Much... \n \n \n \nCan You Advance?";
         else if (showDicePart == 2)
         {
             if (diceNumber == 1)
-                moveDiceText.text = "Move... \nspace";
+                moveDiceText.text = "Move... \n \n \n \nspace";
             else
-                moveDiceText.text = "Move... \nspaces";
+                moveDiceText.text = "Move... \n \n \n \nspaces";
         }
     }
     public void ShowMovingText(MovingType movingType, int diceNumber, int currentTarget)
     {
-        if (diceNumber > 1)
             switch ((int)movingType)
             {
                 case 0:

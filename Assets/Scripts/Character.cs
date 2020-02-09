@@ -1,32 +1,39 @@
 ﻿using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
 
-class Character : MonoBehaviour
+public class Character : MonoBehaviour
 {
     private PlayerState playerState = 0;
     private Quaternion rotationFrom;
     private Quaternion rotationTo;
     private Transform temporalTargetDisplacement;
-    private Transform targetDisplacement;
 
-    public void PlayerMove(Transform specificVoidCharacterTransform, Transform[] wayPoints, int temporalCurrentTarget, int currentTarget) 
+    public void PlayerMove(Transform specificVoidCharacterTransform, Transform[] wayPoints, int temporalCurrentTarget, int currentTarget, int __playerTurn) 
     {
-        AudioScript.instance.PlayerAudio(playerState);
-        AnimationScript.instance.PlayerAnimations(playerState);
-        PlayerRotate();
+        AudioScript.instance.PlayerAudio(playerState, __playerTurn);
+        AnimationScript.instance.PlayerAnimations(playerState, __playerTurn);
+            //print(temporalTargetDisplacement.position);
+
         temporalTargetDisplacement = wayPoints[temporalCurrentTarget];
-        targetDisplacement = wayPoints[currentTarget];
         if (playerState == PlayerState.Moving)
-            specificVoidCharacterTransform.position = Vector3.MoveTowards(specificVoidCharacterTransform.position, temporalTargetDisplacement.position, 1 * Time.deltaTime);
+            specificVoidCharacterTransform.position = Vector3.MoveTowards(specificVoidCharacterTransform.position, temporalTargetDisplacement.position, 10 * Time.deltaTime);
         else if (playerState == PlayerState.Idle)
-            specificVoidCharacterTransform.position = targetDisplacement.position;
-        void PlayerRotate()
+            StartCoroutine(TimeToRest());
+
+
+
+            //rotationFrom = Quaternion.LookRotation(specificVoidCharacterTransform.forward);
+            //if (specificVoidCharacterTransform.position != temporalTargetDisplacement.position)
+            //    rotationTo = Quaternion.LookRotation(temporalTargetDisplacement.position - specificVoidCharacterTransform.position);
+            //else if (currentTarget < wayPoints.Length - 1)
+            //    rotationTo = Quaternion.LookRotation(wayPoints[temporalCurrentTarget + 1].position - specificVoidCharacterTransform.position);
+            //specificVoidCharacterTransform.rotation = Quaternion.Slerp(rotationFrom, rotationTo, 4f * Time.deltaTime);
+        
+        IEnumerator TimeToRest()
         {
-            rotationFrom = Quaternion.LookRotation(specificVoidCharacterTransform.forward);
-            if (specificVoidCharacterTransform.position != temporalTargetDisplacement.position)
-                rotationTo = Quaternion.LookRotation(temporalTargetDisplacement.position - specificVoidCharacterTransform.position);
-            else if (currentTarget < wayPoints.Length - 1)
-                rotationTo = Quaternion.LookRotation(wayPoints[temporalCurrentTarget + 1].position - specificVoidCharacterTransform.position);
-            specificVoidCharacterTransform.rotation = Quaternion.Slerp(rotationFrom, rotationTo, 4f * Time.deltaTime);
+            yield return new WaitForSeconds(1.5f);
+            playerState = PlayerState.Moving;
         }
     }
 
